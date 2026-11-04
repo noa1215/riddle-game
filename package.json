@@ -2,6 +2,9 @@
   "name": "riddle-game",
   "version": "1.0.0",
   "type": "module",
+  "scripts": {
+    "server": "json-server --watch db.json --port 3000"
+  },
   "dependencies": {
     "prompt-sync": "^4.2.0"
   }
