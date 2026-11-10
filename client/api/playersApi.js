@@ -1,8 +1,8 @@
- async function findPlayerByName(name) {
+async function findPlayerByName(name) {
   const res = await fetch(
-    `http://localhost:3000/api/players?name=${encodeURIComponent(name)}`
+    `http://localhost:3000/api/players?name=${encodeURIComponent(name)}`,
   );
-    if (res.status === 404) {
+  if (res.status === 404) {
     return null;
   }
 
@@ -11,15 +11,15 @@
   }
 
   const players = await res.json();
-  
+
   if (!players || players.length === 0) {
     return null;
   }
 
-  return players[0]; 
+  return players[0];
 }
 
- async function createPlayer(name) {
+async function createPlayer(name) {
   const res = await fetch("http://localhost:3000/api/players", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -31,20 +31,35 @@
   return await res.json();
 }
 async function updatePlayer(player) {
-  try {
-    const res = await fetch(`http://localhost:3000/api/players/${player.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(player),
-    });
-    if (!res.ok) {
-      throw new Error(`server responded with status ${res.status}`);
+  const url = `http://localhost:3000/api/players/${player.id}`;
+  const options = {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(player),
+  };
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(url, options);
+      if (!res.ok) {
+        throw new Error(`Server responded with status ${res.status}`);
+      }
+      return await res.json();
+    } catch (err) {
+      const isTemporaryNetworkError = [
+        "ECONNRESET",
+        "ECONNREFUSED",
+        "ETIMEDOUT",
+      ].includes(err.cause?.code);
+
+      if (attempt === 0 && isTemporaryNetworkError) {
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        continue;
+      }
+
+      console.error("Could not update player:", err.message);
+      throw err;
     }
-    return await res.json();
-  } catch (err) {
-    console.log(
-      "Could not update player. Is the server running? (npm run server)",
-    );
   }
 }
 async function getAllPlayers() {
@@ -55,10 +70,9 @@ async function getAllPlayers() {
     }
     return await res.json();
   } catch (err) {
-    console.log(
-      "Could not load players. Is the server running? (npm run server)",
-    );
+    console.error("Could not load players:", err.message);
+    throw err;
   }
 }
 
-export {getAllPlayers, updatePlayer,createPlayer, findPlayerByName}
+export { getAllPlayers, updatePlayer, createPlayer, findPlayerByName };

@@ -3,7 +3,7 @@ import { readFile, writeFile } from "../db/dbHelpers.js";
 
 const router = Router();
 
-function isValidRiddle(data) {
+function getRiddleValidationError(data) {
   const {
     name,
     taskDescription,
@@ -18,17 +18,36 @@ function isValidRiddle(data) {
     (typeof correctAnswer === "string" && correctAnswer.trim() !== "") ||
     typeof correctAnswer === "number";
 
-  return (
-    typeof name === "string" && Boolean(name.trim()) &&
-    typeof taskDescription === "string" && Boolean(taskDescription.trim()) &&
-    Array.isArray(choices) && choices.length >= 2 &&
-    choices.every((choice) => typeof choice === "string" && Boolean(choice.trim())) &&
-    hasCorrectAnswer &&
-    Number.isInteger(answerIndex) && answerIndex >= 1 && answerIndex <= choices.length &&
-    ["easy", "medium", "hard"].includes(difficulty) &&
-    Number.isInteger(timeLimit) && timeLimit > 0 &&
-    (hint === undefined || typeof hint === "string")
-  );
+  if (typeof name !== "string" || !name.trim()) {
+    return "Name is required.";
+  }
+  if (typeof taskDescription !== "string" || !taskDescription.trim()) {
+    return "Task description is required.";
+  }
+  if (!Array.isArray(choices) || choices.length < 2) {
+    return "Enter at least two comma-separated choices.";
+  }
+  if (!choices.every((choice) => typeof choice === "string" && choice.trim())) {
+    return "Choices cannot be empty.";
+  }
+  if (
+    !hasCorrectAnswer ||
+    !Number.isInteger(answerIndex) ||
+    answerIndex < 1 ||
+    answerIndex > choices.length
+  ) {
+    return `Correct answer must be a choice number from 1 to ${choices.length}.`;
+  }
+  if (!["easy", "medium", "hard"].includes(difficulty)) {
+    return "Difficulty must be easy, medium, or hard (lowercase).";
+  }
+  if (!Number.isInteger(timeLimit) || timeLimit <= 0) {
+    return "Time limit must be a positive whole number of seconds.";
+  }
+  if (hint !== undefined && typeof hint !== "string") {
+    return "Hint must be text.";
+  }
+  return null;
 }
 
 function formatRiddle(data, id) {
@@ -79,8 +98,9 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  if (!isValidRiddle(req.body)) {
-    return res.status(400).json({ error: "Invalid riddle data" });
+  const validationError = getRiddleValidationError(req.body);
+  if (validationError) {
+    return res.status(400).json({ error: validationError });
   }
 
   try {
@@ -111,8 +131,9 @@ router.put("/:id", async (req, res) => {
     if (index === -1) {
       return res.status(404).json({ error: "Riddle not found" });
     }
-    if (!isValidRiddle(req.body)) {
-      return res.status(400).json({ error: "Invalid riddle data" });
+    const validationError = getRiddleValidationError(req.body);
+    if (validationError) {
+      return res.status(400).json({ error: validationError });
     }
 
     const updatedRiddle = formatRiddle(req.body, id);

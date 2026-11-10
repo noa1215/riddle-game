@@ -45,8 +45,8 @@
     },
     {
       "id": 4,
-      "name": "Number Sequence",
-      "taskDescription": "2, 4, 8, 16, 32 are powers of which number?",
+      "name": "number seq",
+      "taskDescription": "2, 4, 8, 16, 32 are powers of which number?\u0000\u0000",
       "correctAnswer": "3",
       "choices": [
         "6",
@@ -60,17 +60,17 @@
     },
     {
       "id": 5,
-      "name": "Number Sequence",
-      "taskDescription": "What comes next? 2, 4, 8, 16, ...",
-      "correctAnswer": "3",
+      "name": "what is your age",
+      "taskDescription": "age",
+      "correctAnswer": "2",
       "choices": [
-        "6",
-        "7",
-        "32",
-        "9"
+        "1",
+        "18",
+        "50",
+        "70"
       ],
-      "difficulty": "easy",
-      "timeLimit": 10
+      "difficulty": "hard",
+      "timeLimit": 5
     }
   ],
   "players": [
@@ -86,8 +86,18 @@
     },
     {
       "name": "noa",
-      "lowestTime": null,
+      "lowestTime": 200,
       "id": 3
+    },
+    {
+      "id": 4,
+      "name": "m",
+      "lowestTime": null
+    },
+    {
+      "id": 5,
+      "name": "not",
+      "lowestTime": 19
     }
   ]
 }

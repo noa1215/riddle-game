@@ -7,8 +7,7 @@ try {
   }
   arrRiddle = await res.json();
 } catch (err) {
-  console.log("Could not load riddles. Is the server running? (npm run server)");
-  process.exit(1);
+ console.log("Could not fetch riddles:", err.message);  process.exit(1);
 }
 return arrRiddle;
 }
@@ -31,12 +30,12 @@ async function createRiddle(riddle) {
       body: JSON.stringify(riddle)
     });
     if (!res.ok) {
-      throw new Error(`Server responded with status ${res.status}`);
+      const error = await res.json();
+      throw new Error(`Server responded with status ${res.status}: ${error.error}`);
     }
     return await res.json();
   } catch (err) {
-    console.log("Could not create riddle. Is the server running? (npm run server)");
-    process.exit(1);
+ console.log("Could not create riddle:", err.message);    process.exit(1);
   }
 }
 
@@ -54,8 +53,7 @@ async function updateRiddle(id, riddle) {
     }
     return await res.json();
   } catch (err) {
-    console.log("Could not update riddle. Is the server running? (npm run server)");
-    process.exit(1);
+ console.log("Could not update riddle:", err.message);    process.exit(1);
   }
 }
 async function deleteRiddle(id) {
@@ -71,8 +69,7 @@ async function deleteRiddle(id) {
   }
   return await res.json();
 } catch (err) {
-  console.log("Could not delete riddle. Is the server running? (npm run server)");
-  process.exit(1);
+ console.log("Could not delete riddle:", err.message);  process.exit(1);
 
 }}
 
